@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color:#eee;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+        }
+        h1 {
+            text-transform: capitalize;
+            font-size: 40px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        img {
+            width: 100px;
+        }
+      </style>
+</head>
+<body>
+    Starting
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const sips = [];
+    socket.on("data", res => {
+        console.log(res)
+        sips.push(res)
+        document.body.innerHTML = `<h1>${res.speed}</h1>` 
+    });
+
+</script>
+</html>
