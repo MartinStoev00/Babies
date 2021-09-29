@@ -6,13 +6,21 @@ const io = require('socket.io')(http);
 const mongoose = require("mongoose");
 const mongo_uri = "mongodb+srv://root:root@cluster0.vu3n0.mongodb.net/babies?retryWrites=true&w=majority";
 
-// app.use(express.json())
+appExpress.use(express.json())
 appExpress.use(express.static('public'))
 
-const pushToMongo = (babies) => {
-    babies.forEach(baby => {
-        
+const uncommitedBabies = []
+
+const pushToMongo = () => {
+    console.log(uncommitedBabies)
+    const earliest = uncommitedBabies[0]["date"]
+    const latest = uncommitedBabies[uncommitedBabies.length - 1]["date"]
+    const timeframe = `${earliest}=${latest}`
+    uncommitedBabies.forEach(({speed, time}) => {
+        const newBaby = new BabyModel({speed, time, timeframe});
+        newBaby.save();
     })
+    uncommitedBabies.splice(0, uncommitedBabies.length);
 }
 
 mongoose.connect(mongo_uri, {
@@ -21,18 +29,33 @@ mongoose.connect(mongo_uri, {
 });
 
 io.on("connection", socket => {
-    socket.on("data", data => {
-        console.log(data);
-        // const baby = new BabyModel({speed: data.speed});
-        // baby.save();
-        io.sockets.emit("data", {
-            speed: data.speed
-        });
-    }); 
+    socket.on("data", speed => {
+        uncommitedBabies.push({...speed, time: new Date().toString()})
+        io.sockets.emit("data", {...speed});
+    });
+
+    socket.on("end", () => {
+        pushToMongo()
+    })
 });
 
-
-
-
+appExpress.get("/babies", async (req, res) => {
+    try {
+        const allBabies = await BabyModel.find()
+        const timeStamps = new Set(allBabies.map(baby => baby["timeframe"]))
+        const ret = Array.from(timeStamps).map(timeStamp => {
+            startEnd = timeStamp.split("=")
+            return {
+                start: startEnd[0],
+                end: startEnd[1],
+                babies: allBabies.filter(currBaby => currBaby["timeframe"] === timeStamp)
+            }
+        })
+        res.status(201).json(ret)
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({...err})
+    }
+})
 
 http.listen(3000 , () => console.log('Server Running'))
