@@ -13,14 +13,15 @@ const uncommitedBabies = []
 
 const pushToMongo = () => {
     console.log(uncommitedBabies)
-    const earliest = uncommitedBabies[0]["date"]
-    const latest = uncommitedBabies[uncommitedBabies.length - 1]["date"]
+    const earliest = uncommitedBabies[0]["time"]
+    const latest = uncommitedBabies[uncommitedBabies.length - 1]["time"]
     const timeframe = `${earliest}=${latest}`
     uncommitedBabies.forEach(({speed, time}) => {
         const newBaby = new BabyModel({speed, time, timeframe});
         newBaby.save();
     })
     uncommitedBabies.splice(0, uncommitedBabies.length);
+    console.log("End Message Sent")
 }
 
 mongoose.connect(mongo_uri, {
@@ -31,7 +32,7 @@ mongoose.connect(mongo_uri, {
 io.on("connection", socket => {
     socket.on("data", speed => {
         uncommitedBabies.push({...speed, time: new Date().toString()})
-        io.sockets.emit("data", {...speed});
+        io.sockets.emit("data", {...speed, date: new Date().toString()});
     });
 
     socket.on("end", () => {

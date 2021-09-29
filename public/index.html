@@ -7,31 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        body {
-            background-color:#eee;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-content: center;
+        .container {
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
             align-items: center;
         }
-        h1 {
-            text-transform: capitalize;
-            font-size: 40px;
-            font-family: Arial, Helvetica, sans-serif;
+        .item {
+            width: 100vw;
+            height: 50vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
         }
-        img {
-            width: 100px;
-        }
-      </style>
+    </style>
 </head>
 <body>
-    <div style="width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div style="width: 100vw;height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div class="container">
+        <div class="item">
             <canvas id="dataChart"></canvas>
         </div>
-        <div style="width: 100vw;height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div class="item">
             <canvas id="liveChart"></canvas>
         </div>
     </div>
@@ -40,8 +39,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+
+    const prevData = []
+    fetch("http://localhost:3000/babies")
+        .then(res => res.json())
+        .then(console.log)
+        .catch(console.log)
+
     const socket = io();
-    const sips = [];
 
     var ctxData = document.getElementById('dataChart').getContext('2d');
     var myChartData = new Chart(ctxData, {
@@ -81,23 +86,18 @@
         }
     });
 
-    socket.on("data", res => {
-        console.log(res)
-        sips.push(res)
-        updateLiveChart(res.speed, res.date)
+    socket.on("data", ({speed, date}) => {
+        const time = new Date(date).getHours() + ":" + new Date(date).getMinutes() + ":" + new Date(date).getSeconds()
+        updateLiveChart(myChartLive, speed, time)
     });
 
-    function updateLiveChart(dataValue, dataLabel){
-        myChartLive.data.labels.push(dataLabel);
-        myChartLive.data.datasets.forEach((dataset) => {
+    function updateLiveChart(chart, dataValue, dataLabel) {
+        chart.data.labels.push(dataLabel);
+        chart.data.datasets.forEach((dataset) => {
             dataset.data.push(dataValue);
         });
+        chart.update()
     }
 
 </script>
 </html>
-
-
-<script>
-
-</script>
