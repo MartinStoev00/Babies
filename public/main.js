@@ -44,7 +44,7 @@ fetch("http://localhost:3000/babies")
     .then(res => res.json())
     .then(res => {
         console.log(res)
-        res.forEach(({start, end ,babies}) => {
+        res.forEach(({start, end ,babies}, index) => {
             const e = document.createElement('button');
             e.className = "dropdown-option"
             const startDate = new Date(start)
@@ -58,12 +58,13 @@ fetch("http://localhost:3000/babies")
             const endMinute = endDate.getMinutes().toString().padStart(2, '0')
             e.onclick = () => {
                 dropdownOptions.style.display = "none"
+
                 myChartData.data.labels = []
                 myChartData.data.datasets.data = []
                 myChartData.update()
 
-                babies.sort((o1, o2) => {
-                    return new Date(o1.time) - new Date(o2.time)
+                babies.sort(({time: t1}, {time: t2}) => {
+                    return new Date(t1) - new Date(t2)
                   })
                 .forEach(({speed, time}) => {    
                     const h = new Date(time).getHours().toString().padStart(2, '0')
@@ -80,10 +81,27 @@ fetch("http://localhost:3000/babies")
     .catch(console.log)
 
 dropdownSelect.onclick = () => {
+    let index = 0
     if(dropdownOptions.style.display === "block") {
         dropdownOptions.style.display = "none"
+        dropdownSelect.style.borderRadius = "10px"
+        index++
+        Array.prototype.forEach.call(document.getElementsByClassName("dropdown-option"), (el) => {
+            setTimeout(() => {
+                el.style.display = "none"
+                el.style.opacity = "0"
+            }, index*100)
+        });
     } else {
         dropdownOptions.style.display = "block"
+        dropdownSelect.style.borderRadius = "10px 10px 0 0"
+        Array.prototype.forEach.call(document.getElementsByClassName("dropdown-option"), (el) => {
+            index++
+            setTimeout(() => {
+                el.style.display = "block"
+                el.style.opacity = "1"
+            }, index*100)
+        });
     }
 }
 

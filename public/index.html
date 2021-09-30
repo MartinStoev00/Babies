@@ -15,6 +15,7 @@
             flex-direction: column; 
             justify-content: center; 
             align-items: center;
+            position: relative;
         }
         .graph {
             padding-right: 10px;
@@ -26,10 +27,35 @@
             align-items: center;
         }
         #dropdown-options {
-            display: none;
+            width: 100%;
         }
-        .dropdown-option {
-            display: block;
+        #dropdown-select, .dropdown-option {
+            padding: 10px 0;
+            border: none;
+            display: none;
+            opacity: 0;
+            transition: .3s;
+            width: 100%;
+        }
+        #dropdown-select {
+            border-radius: 10px;    
+            width: 100%;
+            font-weight: bold;
+        }
+        .dropdown {
+            border-radius: 10px;
+            width: 200px;
+            position: absolute;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-content: stretch;
+            align-items: center;
+        }
+        .dropdown-option:last-child {
+            border-radius: 0 0 10px 10px;
         }
     </style>
 </head>
@@ -37,7 +63,7 @@
     <div class="graphContainer" style="width: 96vw; max-width: 4000px;">
         <div class="graphContainer">
             <div class="dropdown">
-                <button id="dropdown-select">Select Date</button>
+                <button id="dropdown-select" style="display: block;opacity: 1;">Select Date</button>
                 <div id="dropdown-options"></div>
             </div>
             <div class="graph">
