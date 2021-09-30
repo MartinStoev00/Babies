@@ -17,7 +17,7 @@ const chartSelect = (chartName, dull) => {
         data: {
             labels: [],
             datasets: [{
-                label: "Feeding Speed",
+                label: "Weight",
                 borderColor,
                 data: [],
                 borderWidth: 2,
@@ -70,7 +70,7 @@ fetch("http://localhost:3000/babies")
                     const m = new Date(time).getMinutes().toString().padStart(2, '0')
                     const s = new Date(time).getSeconds().toString().padStart(2, '0')
                     const t = `${h}:${m}:${s}` 
-                    updateLiveChart(myChartData, speed, t)
+                    updateChart(myChartData, speed, t)
                 })
             }
             e.innerHTML = `${dayDate}-${monthDate}-${yearDate}(${startHour}:${startMinute}-${endHour}:${endMinute})`
@@ -110,10 +110,10 @@ socket.on("data", ({speed, date}) => {
     const m = new Date(date).getMinutes().toString().padStart(2, '0')
     const s = new Date(date).getSeconds().toString().padStart(2, '0')
     const time =  `${h}:${m}:${s}` 
-    updateLiveChart(myChartLive, speed, time)
+    updateChart(myChartLive, speed, time)
 });
 
-function updateLiveChart(chart, dataValue, dataLabel) {
+function updateChart(chart, dataValue, dataLabel) {
     chart.data.labels.push(dataLabel);
     chart.data.datasets.forEach((dataset) => {
         dataset.data.push(dataValue);
