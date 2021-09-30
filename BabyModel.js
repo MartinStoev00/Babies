@@ -6,10 +6,10 @@ const BabySchema = new mongoose.Schema({
         required: true,
     },
     time: { 
-        type : Date,
+        type : String,
         require: true
     },
-    timeframe: {
+    day: {
         type: String,
         required: true 
     }

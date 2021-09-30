@@ -40,40 +40,51 @@ const chartSelect = (chartName, dull) => {
 const myChartLive = chartSelect("liveChart", false)
 const myChartData = chartSelect("dataChart", true)
 
+let fetchedData = [];
+
+/*example:
+[
+{
+    date: date,
+    data: [1,2,3,4,5]
+    times: [time, time, time, time, time]
+}
+]
+
+
+
+
+
+
+*/
+function getDayList(date){
+    for (let i = 0; i < fetchedData.length; i++) {
+        if (fetchedData[i].date == date) {
+            return fetchedData;
+        }
+    }
+}
+
+
 fetch("http://localhost:3000/babies")
     .then(res => res.json())
     .then(res => {
         console.log(res)
-        res.forEach(({start, end ,babies}, index) => {
+        res.forEach(({day ,babies}, index) => {
             const e = document.createElement('button');
             e.className = "dropdown-option"
-            const startDate = new Date(start)
-            const endDate = new Date(end)
-            const dayDate = startDate.getDate()
-            const monthDate = startDate.getMonth()
-            const yearDate = startDate.getFullYear()
-            const startHour = startDate.getHours().toString().padStart(2, '0')
-            const endHour = endDate.getHours().toString().padStart(2, '0')
-            const startMinute = startDate.getMinutes().toString().padStart(2, '0')
-            const endMinute = endDate.getMinutes().toString().padStart(2, '0')
+
             e.onclick = () => {
                 dropdownOptions.style.display = "none"
                 myChartData.data.datasets[0].data = [];
                 myChartData.data.labels = [];
                 myChartData.update()
 
-                babies.sort(({time: t1}, {time: t2}) => {
-                    return new Date(t1) - new Date(t2)
-                  })
-                .forEach(({speed, time}) => {    
-                    const h = new Date(time).getHours().toString().padStart(2, '0')
-                    const m = new Date(time).getMinutes().toString().padStart(2, '0')
-                    const s = new Date(time).getSeconds().toString().padStart(2, '0')
-                    const t = `${h}:${m}:${s}` 
-                    updateChart(myChartData, speed, t)
-                })
+                for (let i = 0; i < babies.length; i++) {
+                    updateChart(myChartData, babies[i].speed, babies[i].time)
+                }
             }
-            e.innerHTML = `${dayDate}-${monthDate}-${yearDate}(${startHour}:${startMinute}-${endHour}:${endMinute})`
+            e.innerHTML = `${day}`
             dropdownOptions.appendChild(e)
         })
     })
@@ -105,11 +116,7 @@ dropdownSelect.onclick = () => {
 }
 
 
-socket.on("data", ({speed, date}) => {
-    const h = new Date(date).getHours().toString().padStart(2, '0')
-    const m = new Date(date).getMinutes().toString().padStart(2, '0')
-    const s = new Date(date).getSeconds().toString().padStart(2, '0')
-    const time =  `${h}:${m}:${s}` 
+socket.on("data", ({speed, time}) => {
     updateChart(myChartLive, speed, time)
 });
 

@@ -11,19 +11,6 @@ appExpress.use(express.static('public'))
 
 const uncommitedBabies = []
 
-const pushToMongo = () => {
-    console.log(uncommitedBabies)
-    const earliest = uncommitedBabies[0]["time"]
-    const latest = uncommitedBabies[uncommitedBabies.length - 1]["time"]
-    const timeframe = `${earliest}=${latest}`
-    uncommitedBabies.forEach(({speed, time}) => {
-        const newBaby = new BabyModel({speed, time, timeframe});
-        newBaby.save();
-    })
-    uncommitedBabies.splice(0, uncommitedBabies.length);
-    console.log("End Message Sent")
-}
-
 mongoose.connect(mongo_uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -31,25 +18,25 @@ mongoose.connect(mongo_uri, {
 
 io.on("connection", socket => {
     socket.on("data", speed => {
-        uncommitedBabies.push({...speed, time: new Date().toString()})
-        io.sockets.emit("data", {...speed, date: new Date().toString()});
-    });
+        let s = speed.speed;
+        let date = new Date();
+        let day = date.getDay() + "/" + date.getMonth() + "/" + date.getFullYear();
+        let time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        io.sockets.emit("data", {speed:s, time: time});
 
-    socket.on("end", () => {
-        pushToMongo()
-    })
+        const newBaby = new BabyModel({speed: s, time: time, day: day});
+        newBaby.save();
+    });
 });
 
 appExpress.get("/babies", async (req, res) => {
     try {
         const allBabies = await BabyModel.find()
-        const timeStamps = new Set(allBabies.map(baby => baby["timeframe"]))
-        const ret = Array.from(timeStamps).map(timeStamp => {
-            startEnd = timeStamp.split("=")
+        const days = new Set(allBabies.map(baby => baby["day"]))
+        const ret = Array.from(days).map(day => {
             return {
-                start: startEnd[0],
-                end: startEnd[1],
-                babies: allBabies.filter(currBaby => currBaby["timeframe"] === timeStamp)
+                babies: allBabies.filter(currBaby => currBaby["day"] === day),
+                day: day
             }
         })
         res.status(201).json(ret)
