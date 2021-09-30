@@ -25,14 +25,25 @@
             justify-content: center; 
             align-items: center;
         }
+        #dropdown-options {
+            display: none;
+        }
+        .dropdown-option {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="graphContainer" style="width: 96vw; max-width: 4000px;">
         <div class="graphContainer">
+            <div class="dropdown">
+                <button id="dropdown-select">Select Date</button>
+                <div id="dropdown-options"></div>
+            </div>
             <div class="graph">
                 <canvas id="dataChart"></canvas>
             </div>
+            
             <div class="graph">
                 <canvas id="liveChart"></canvas>
             </div>
@@ -41,77 +52,5 @@
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script>
-
-    const prevData = []
-    fetch("http://localhost:3000/babies")
-        .then(res => res.json())
-        .then(console.log)
-        .catch(console.log)
-
-    const socket = io();
-
-    var ctxData = document.getElementById('dataChart').getContext('2d');
-    var myChartData = new Chart(ctxData, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Feeding Speed",
-                data: [],
-                borderWidth: 2,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    var ctxLive = document.getElementById('liveChart').getContext('2d');
-    var myChartLive = new Chart(ctxLive, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Feeding Speed",
-                borderColor: 'rgb(75, 192, 192)',
-                data: [],
-                borderWidth: 2,
-                fill: true,
-                tension: 0.2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                yAxes: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    socket.on("data", ({speed, date}) => {
-        const time = new Date(date).getHours() + ":" + new Date(date).getMinutes() + ":" + new Date(date).getSeconds()
-        updateLiveChart(myChartLive, speed, time)
-    });
-
-    function updateLiveChart(chart, dataValue, dataLabel) {
-        chart.data.labels.push(dataLabel);
-        chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(dataValue);
-        });
-        chart.update()
-    }
-
-</script>
+<script src="./main.js"></script>
 </html>
