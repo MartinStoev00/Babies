@@ -58,8 +58,8 @@ fetch("http://localhost:3000/babies")
             const endMinute = endDate.getMinutes().toString().padStart(2, '0')
             e.onclick = () => {
                 dropdownOptions.style.display = "none"
-                myChartData.data.labels = []
-                myChartData.data.datasets.data = []
+                myChartData.data.datasets[0].data = [];
+                myChartData.data.labels = [];
                 myChartData.update()
 
                 babies.sort((o1, o2) => {
